@@ -69,7 +69,7 @@ router.post('/google', async (req, res) => {
       if (user.authProvider === 'google') {
         user.googleId = googleId;
         if (name) user.name = name;
-        if (picture) user.profilePicture = picture;
+        if (!user.profilePicture && picture) user.profilePicture = picture;
         user.isEmailVerified = true;
         user.lastLogin = new Date();
         await user.save();
@@ -113,9 +113,12 @@ router.post('/google', async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          gender: user.gender || 'prefer_not_to_say',
+          phone: user.phone || '',
           profilePicture: user.profilePicture || '',
-          authProvider: user.authProvider
+          role: user.role || 'user',
+          authProvider: user.authProvider || 'google',
+          isEmailVerified: user.isEmailVerified ?? true
         }
       }
     });

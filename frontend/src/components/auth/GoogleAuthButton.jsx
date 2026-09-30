@@ -32,7 +32,7 @@ export default function GoogleAuthButton({ buttonText = "Log in with Google", on
       const res = await googleAuthenticate(response.credential);
 
       if (res && res.success && res.data) {
-        login(res.data.token, res.data.user);
+        await login(res.data.token, res.data.user);
         navigate("/");
       } else {
         throw new Error(res?.message || "Google authentication failed.");

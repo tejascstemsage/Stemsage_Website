@@ -61,3 +61,37 @@ export const updateProfile = async (token, profileData) => {
 
   return data;
 };
+
+/**
+ * Upload profile picture via POST /api/users/me/profile-picture
+ * @param {string} token - STEMSAGE JWT
+ * @param {File} file - Image file object to upload
+ * @returns {Promise<Object>} API response data with updated user object
+ */
+export const uploadProfilePicture = async (token, file) => {
+  if (!token) {
+    throw new Error('Authentication token is required.');
+  }
+
+  const formData = new FormData();
+  formData.append('profilePicture', file);
+
+  const response = await fetch(`${API_URL}/api/users/me/profile-picture`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(data.message || 'Failed to upload profile picture.');
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};

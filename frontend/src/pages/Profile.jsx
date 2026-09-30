@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getProfile, updateProfile } from "../services/userService";
+import { getProfile, updateProfile, uploadProfilePicture } from "../services/userService";
 import Footer from "../components/common/Footer";
-import { User, CheckCircle2, AlertCircle, Edit3, Save, X, LogOut } from "lucide-react";
+import { User, CheckCircle2, AlertCircle, Edit3, Save, X, LogOut, Camera, Upload } from "lucide-react";
 
 function Profile() {
   const { user, token, isAuthenticated, updateUser, logout } = useAuth();
@@ -11,9 +11,13 @@ function Profile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const fileInputRef = useRef(null);
 
   const [profileData, setProfileData] = useState({
     id: "",
@@ -95,6 +99,57 @@ function Profile() {
       gender: profileData.gender || "prefer_not_to_say",
       profilePicture: profileData.profilePicture || "",
     });
+  };
+
+  const handlePhotoSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setError("");
+    setSuccess("");
+
+    // Validate file type (JPG, JPEG, PNG, WebP)
+    const validMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validMimeTypes.includes(file.type.toLowerCase())) {
+      setError("Invalid file type. Only JPG, JPEG, PNG, and WebP images are allowed.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size exceeds maximum limit of 5 MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Generate local preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreview(previewUrl);
+
+    try {
+      setUploadingPhoto(true);
+      const response = await uploadProfilePicture(token, file);
+      if (response.success && response.data?.user) {
+        const updatedUser = response.data.user;
+        setProfileData(updatedUser);
+        setFormData((prev) => ({
+          ...prev,
+          profilePicture: updatedUser.profilePicture || "",
+        }));
+        updateUser(updatedUser);
+        setSuccess("Profile picture updated successfully!");
+      } else {
+        setError(response.message || "Failed to upload profile picture.");
+      }
+    } catch (err) {
+      console.error("Profile picture upload error:", err);
+      setError(err.message || "An error occurred while uploading profile picture.");
+    } finally {
+      setUploadingPhoto(false);
+      setPhotoPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -180,29 +235,72 @@ function Profile() {
               {/* Top Profile Header Card */}
               <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
-                  {/* Profile Picture / Fallback Initial */}
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full border border-slate-200 bg-red-50 text-red-600 flex items-center justify-center font-extrabold text-2xl overflow-hidden shrink-0">
-                    {profileData.profilePicture ? (
+                  {/* Profile Picture / Cloudinary Photo Avatar */}
+                  <div className="relative group h-20 w-20 sm:h-24 sm:w-24 rounded-full border-2 border-red-100 bg-red-50 text-red-600 flex items-center justify-center font-extrabold text-2xl overflow-hidden shrink-0 shadow-sm">
+                    {photoPreview || profileData.profilePicture ? (
                       <img
-                        src={profileData.profilePicture}
+                        src={photoPreview || profileData.profilePicture}
                         alt={profileData.name}
                         className="h-full w-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.style.display = "none";
+                          if (!photoPreview) e.currentTarget.style.display = "none";
                         }}
                       />
                     ) : null}
-                    <span>{profileData.name ? profileData.name.charAt(0).toUpperCase() : "U"}</span>
+                    {!(photoPreview || profileData.profilePicture) && (
+                      <span>{profileData.name ? profileData.name.charAt(0).toUpperCase() : "U"}</span>
+                    )}
+
+                    {uploadingPhoto && (
+                      <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      </div>
+                    )}
+
+                    {!uploadingPhoto && (
+                      <label
+                        htmlFor="profile-photo-input"
+                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
+                        title="Upload Profile Photo"
+                      >
+                        <Camera size={20} />
+                        <span className="text-[10px] font-bold mt-1 uppercase tracking-wider">Change</span>
+                      </label>
+                    )}
                   </div>
+
+                  {/* Hidden File Input */}
+                  <input
+                    id="profile-photo-input"
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handlePhotoSelect}
+                    disabled={uploadingPhoto}
+                    className="hidden"
+                  />
 
                   <div>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                       {profileData.name || "User"}
                     </h2>
                     <p className="text-sm text-slate-500 mt-0.5">{profileData.email}</p>
-                    <span className="inline-block mt-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                      {profileData.authProvider === "google" ? "Google Account" : "STEMSAGE Local Account"}
-                    </span>
+                    
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                      <span className="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                        {profileData.authProvider === "google" ? "Google Account" : "STEMSAGE Local Account"}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingPhoto}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold border border-red-200 transition cursor-pointer"
+                      >
+                        <Camera size={12} />
+                        <span>{uploadingPhoto ? "Uploading..." : "Upload Photo"}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
