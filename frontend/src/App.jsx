@@ -8,6 +8,7 @@ import Forum from "./pages/Forum";
 import Courses from "./pages/Courses";
 import Store from "./pages/Store";
 import Gallery from "./pages/Gallery";
+import News from "./pages/News";
 
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -31,6 +32,7 @@ function App() {
         <Route path="/courses" element={<Courses />} />
         <Route path="/store" element={<Store />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/news" element={<News />} />
         <Route path="/learning" element={<Navigate to="/gallery" replace />} />
 
         <Route path="/contact" element={<Contact />} />

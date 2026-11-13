@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Tag, Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getNews } from "../../services/newsService";
+import NewsCard from "../../components/news/NewsCard";
 
 /* -----------------------------------------------------------------------
-   FALLBACK NEWS DATA (used when API fails or returns empty)
+   FALLBACK NEWS DATA (used when API fails)
 ------------------------------------------------------------------------ */
 const fallbackNews = [
     {
@@ -69,75 +70,12 @@ function mapApiNews(apiNews, index) {
     };
 }
 
-/* -----------------------------------------------------------------------
-   Single news card
------------------------------------------------------------------------- */
-function NewsCard({ item }) {
-    const [imgError, setImgError] = useState(false);
-
-    return (
-        <article
-            className="group relative flex flex-col rounded-2xl overflow-hidden bg-white shadow-md border border-slate-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-            aria-label={item.title}
-        >
-            {/* Thumbnail */}
-            <div className="relative h-52 w-full overflow-hidden bg-slate-200 shrink-0">
-                {!imgError ? (
-                    <img
-                        src={item.image}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-400 text-xs font-semibold">
-                        Image unavailable
-                    </div>
-                )}
-
-                {/* Gradient overlay at bottom */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-                {/* Tag chip */}
-                <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-[11px] font-bold text-slate-800 shadow-sm">
-                    <Tag className="h-3 w-3 text-red-600" />
-                    {item.tag}
-                </span>
-
-                {/* Date */}
-                <span className="absolute bottom-3 left-3 flex items-center gap-1.5 text-[11px] font-semibold text-white/90">
-                    <Calendar className="h-3 w-3" />
-                    {item.date}
-                </span>
-            </div>
-
-            {/* Text content */}
-            <div className="flex flex-col flex-1 p-5">
-                <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug line-clamp-3 group-hover:text-red-600 transition-colors duration-300">
-                    {item.title}
-                </h3>
-
-                <div className="mt-auto pt-4">
-                    <Link
-                        to={item.link}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 transition-colors duration-200"
-                        aria-label={"Read more about: " + item.title}
-                    >
-                        Read More
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
-                    </Link>
-                </div>
-            </div>
-        </article>
-    );
-}
 
 /* -----------------------------------------------------------------------
-   Section — News & Highlights
+   Section — News & Highlights (Home page - shows first 3 only)
 ------------------------------------------------------------------------ */
 function NewsHighlights() {
-    const VISIBLE_DEFAULT = 3;
-    const [showAll, setShowAll] = useState(false);
+    const LIMIT = 3;
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -147,7 +85,7 @@ function NewsHighlights() {
         async function loadNews() {
             try {
                 setLoading(true);
-                const apiNews = await getNews();
+                const apiNews = await getNews(LIMIT);
                 if (!cancelled) {
                     if (apiNews && apiNews.length > 0) {
                         const mapped = apiNews.map(mapApiNews);
@@ -161,7 +99,7 @@ function NewsHighlights() {
                 console.warn("Failed to fetch news, using fallback:", err.message);
                 if (!cancelled) {
                     setError(true);
-                    setNews(fallbackNews);
+                    setNews(fallbackNews.slice(0, LIMIT));
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -176,8 +114,7 @@ function NewsHighlights() {
         return null;
     }
 
-    const newsItemsToShow = error ? fallbackNews : news;
-    const visibleItems = showAll ? newsItemsToShow : newsItemsToShow.slice(0, VISIBLE_DEFAULT);
+    const newsItemsToShow = error ? fallbackNews.slice(0, LIMIT) : news;
 
     return (
         <section
@@ -226,26 +163,22 @@ function NewsHighlights() {
                             </div>
                         ))
                     ) : (
-                        visibleItems.map((item) => (
+                        newsItemsToShow.map((item) => (
                             <NewsCard key={item.id} item={item} />
                         ))
                     )}
                 </div>
 
-                {/* See All / Show Less button */}
-                {!loading && newsItemsToShow.length > VISIBLE_DEFAULT && (
+                {/* View All News button */}
+                {!loading && (
                     <div className="mt-10 flex justify-center">
-                        <button
-                            type="button"
-                            id="news-highlights-toggle-btn"
-                            onClick={() => setShowAll((prev) => !prev)}
+                        <Link
+                            to="/news"
                             className="inline-flex items-center gap-2 rounded-lg bg-[#1c2d5a] hover:bg-[#15234a] text-white font-bold text-sm px-8 py-3.5 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.03]"
                         >
-                            {showAll ? "Show Less" : "See All"}
-                            <ArrowRight
-                                className={"h-4 w-4 transition-transform duration-300 " + (showAll ? "rotate-180" : "")}
-                            />
-                        </button>
+                            View All News
+                            <ArrowRight className="h-4 w-4 transition-transform duration-300" />
+                        </Link>
                     </div>
                 )}
             </div>

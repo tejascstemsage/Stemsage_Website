@@ -74,6 +74,11 @@ function Footer() {
                                     Gallery
                                 </Link>
                             </li>
+                            <li>
+                                <Link to="/news" className="hover:text-red-600 underline-offset-4 hover:underline">
+                                    News & Highlights
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

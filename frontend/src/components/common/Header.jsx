@@ -72,6 +72,7 @@ const navItems = [
     dropdown: [
       { label: "Blog", path: "/forum" },
       { label: "Gallery", path: "/gallery" },
+      { label: "News & Highlights", path: "/news" },
 
     ],
   },
