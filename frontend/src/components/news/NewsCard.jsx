@@ -3,17 +3,19 @@ import { Tag, Calendar, ArrowRight } from "lucide-react";
 
 /* -----------------------------------------------------------------------
    Single news card - shared between Home highlights and News page
+   Card shell matches Services card: rounded-xl, border-slate-200, shadow-sm,
+   hover:shadow-lg hover:border-red-200 hover:-translate-y-0.5
 ------------------------------------------------------------------------ */
 function NewsCard({ item }) {
     const [imgError, setImgError] = useState(false);
 
     return (
         <article
-            className="group relative h-full flex flex-col rounded-2xl overflow-hidden bg-white shadow-md border border-slate-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="group h-full flex flex-col rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:border-red-200 hover:-translate-y-0.5"
             aria-label={item.title}
         >
-            {/* Thumbnail - fixed aspect ratio */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-200 shrink-0">
+            {/* Thumbnail - fixed aspect ratio [16/10] to match Services */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 shrink-0">
                 {!imgError ? (
                     <img
                         src={item.image}
@@ -22,7 +24,7 @@ function NewsCard({ item }) {
                         onError={() => setImgError(true)}
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-400 text-xs font-semibold">
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400 text-xs font-semibold">
                         Image unavailable
                     </div>
                 )}
@@ -43,20 +45,23 @@ function NewsCard({ item }) {
                 </span>
             </div>
 
-            {/* Text content */}
-            <div className="flex-1 flex flex-col p-5">
-                <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 leading-snug line-clamp-3 group-hover:text-red-600 transition-colors duration-300">
+            {/* Divider - matches Services card */}
+            <div className="h-px bg-slate-100" />
+
+            {/* Text content - matches Services card padding (px-5 pt-4 pb-5) */}
+            <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
+                <h3 className="text-base font-extrabold text-slate-900 leading-tight line-clamp-3 group-hover:text-red-600 transition-colors duration-300">
                     {item.title}
                 </h3>
 
                 <div className="mt-auto pt-4">
                     <a
                         href={item.link}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 transition-colors duration-200"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-2.5 px-4 transition-all duration-300 shadow hover:shadow-md hover:scale-[1.02]"
                         aria-label={"Read more about: " + item.title}
                     >
                         Read More
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                        <ArrowRight className="h-4 w-4" />
                     </a>
                 </div>
             </div>

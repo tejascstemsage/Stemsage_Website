@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Footer from "../components/common/Footer";
-import { ProductCard } from "../components/home/OurProducts";
+import { ProductCard, mapApiProduct } from "../components/home/OurProducts";
 import { getProducts } from "../services/productService";
 import { fallbackProducts } from "../constants/fallbackProducts";
 
@@ -19,7 +19,9 @@ function Store() {
         const apiProducts = await getProducts();
         if (!cancelled) {
           if (apiProducts && apiProducts.length > 0) {
-            setProducts(apiProducts);
+            // Map API products to card shape and format prices
+            const mapped = apiProducts.map((p, i) => mapApiProduct(p, i));
+            setProducts(mapped);
           } else {
             // API succeeded but returned empty
             setProducts(fallbackProducts);
@@ -125,9 +127,16 @@ function Store() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-              {products.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
+              {products.map((product, index) => {
+                const firstFeaturedIndex = products.findIndex(p => p.featured);
+                return (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isFirstFeatured={index === firstFeaturedIndex}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

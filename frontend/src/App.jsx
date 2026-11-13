@@ -16,6 +16,7 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 
 import { AuthProvider } from "./context/AuthContext";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 function App() {
   return (
@@ -25,20 +26,20 @@ function App() {
       <Header />
 
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/forum" element={<Forum />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/store" element={<Store />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/news" element={<News />} />
+        <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
+        <Route path="/about" element={<ErrorBoundary><About /></ErrorBoundary>} />
+        <Route path="/services" element={<ErrorBoundary><Services /></ErrorBoundary>} />
+        <Route path="/forum" element={<ErrorBoundary><Forum /></ErrorBoundary>} />
+        <Route path="/courses" element={<ErrorBoundary><Courses /></ErrorBoundary>} />
+        <Route path="/store" element={<ErrorBoundary><Store /></ErrorBoundary>} />
+        <Route path="/gallery" element={<ErrorBoundary><Gallery /></ErrorBoundary>} />
+        <Route path="/news" element={<ErrorBoundary><News /></ErrorBoundary>} />
         <Route path="/learning" element={<Navigate to="/gallery" replace />} />
 
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/contact" element={<ErrorBoundary><Contact /></ErrorBoundary>} />
+        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+        <Route path="/signup" element={<ErrorBoundary><Signup /></ErrorBoundary>} />
+        <Route path="/profile" element={<ErrorBoundary><Profile /></ErrorBoundary>} />
       </Routes>
 
     </BrowserRouter>

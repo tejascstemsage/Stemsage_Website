@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
     CheckCircle2,
     Tag,
-    ArrowRight,
     ShoppingCart,
     MessageCircle,
     Star,
@@ -13,11 +12,22 @@ import {
     Wrench,
     GraduationCap,
 } from "lucide-react";
+import ViewAllButton from "../common/ViewAllButton";
 import { getHomeProducts } from "../../services/productService";
 import { fallbackProducts } from "../../constants/fallbackProducts";
 
+/* -----------------------------------------------------------------------
+   Price formatting helper - strip ₹ if present, then format with Indian grouping
+------------------------------------------------------------------------ */
+export function formatPrice(price) {
+    if (!price || price === "Enquire for Price") return "Enquire for Price";
+    const num = Number(String(price).replace(/[₹,\s]/g, ""));
+    if (isNaN(num)) return "Enquire for Price";
+    return `₹${num.toLocaleString("en-IN")}`;
+}
+
 /* Map API product to component shape */
-function mapApiProduct(apiProduct, index) {
+export function mapApiProduct(apiProduct, index) {
     const iconMap = {
         Electronics: Cpu,
         Robotics: Wrench,
@@ -30,20 +40,27 @@ function mapApiProduct(apiProduct, index) {
         AI: Zap,
     };
 
+    // Get raw price without ₹ prefix
+    const rawPrice = apiProduct.price;
+
     return {
         id: String(apiProduct._id || index),
         badge: apiProduct.category || "Product",
         icon: iconMap[apiProduct.category] || Cpu,
-        title: apiProduct.title,
+        title: apiProduct.title || "Product",
         subtitle: apiProduct.description?.substring(0, 60) || "STEM Product",
-        features: apiProduct.features?.slice(0, 4) || [
-            "High-quality components",
-            "Comprehensive guides",
-            "Hands-on learning",
-        ],
-        price: apiProduct.price ? `₹${apiProduct.price}` : "Enquire for Price",
+        features: Array.isArray(apiProduct.features) && apiProduct.features.length > 0
+            ? apiProduct.features.slice(0, 4)
+            : [
+                "High-quality components",
+                "Comprehensive guides",
+                "Hands-on learning",
+            ],
+        price: formatPrice(rawPrice),
         priceType: apiProduct.price ? "fixed" : "enquire",
-        tags: apiProduct.tags?.slice(0, 6) || [apiProduct.category].filter(Boolean),
+        tags: Array.isArray(apiProduct.tags) && apiProduct.tags.length > 0
+            ? apiProduct.tags.slice(0, 6)
+            : [apiProduct.category].filter(Boolean),
         cta: apiProduct.price ? "Buy Now" : "Enquire Now",
         ctaType: apiProduct.price ? "buy" : "enquire",
         ctaLink: apiProduct.price ? "/store" : "/contact",
@@ -55,29 +72,32 @@ function mapApiProduct(apiProduct, index) {
 /* ============================================================
    PRODUCT CARD
    ============================================================ */
-export function ProductCard({ product }) {
-    const Icon = product.icon;
+export function ProductCard({ product, isFirstFeatured = false }) {
+    const Icon = product.icon || Cpu;
+    const showBadge = !!(product.featured && isFirstFeatured);
+    const features = Array.isArray(product.features) ? product.features : [];
+    const tags = Array.isArray(product.tags) ? product.tags : [];
 
     return (
         <div
             className={`
-                group relative flex flex-col rounded-xl bg-white border transition-all duration-300
-                hover:shadow-lg hover:-translate-y-0.5
+                group relative h-full flex flex-col rounded-xl bg-white border transition-all duration-300
+                hover:shadow-lg hover:border-red-200 hover:-translate-y-0.5
                 ${product.featured
                     ? "border-red-200 shadow-sm ring-2 ring-red-500 ring-offset-1"
-                    : "border-slate-200 shadow-sm hover:border-red-200"
+                    : "border-slate-200 shadow-sm"
                 }
             `}
         >
-            {/* Featured Ribbon */}
-            {product.featured && (
+            {/* Featured Ribbon - inside card, top edge */}
+            {showBadge && (
                 <div className="absolute -top-3 left-4 z-10 flex items-center gap-1 rounded-full bg-red-600 px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white shadow shadow-red-600/30">
                     <Star className="h-2.5 w-2.5 fill-white" />
                     Most Popular
                 </div>
             )}
 
-            {/* Image Placeholder */}
+            {/* Image Placeholder - keep h-40 as specified */}
             <div className={`relative overflow-hidden rounded-t-xl h-40 flex items-center justify-center ${product.featured ? "bg-red-50" : "bg-slate-100"}`}>
                 <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-red-600/8" />
                 <div className="flex flex-col items-center gap-2 opacity-40">
@@ -89,9 +109,11 @@ export function ProductCard({ product }) {
                     <span className="text-[10px] font-medium text-slate-400">Product Image</span>
                 </div>
                 {/* Badge top-right */}
+                {product.badge && (
                 <span className="absolute top-2 right-2 rounded-full bg-white border border-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm">
                     {product.badge}
                 </span>
+                )}
             </div>
 
             {/* Card Header */}
@@ -114,13 +136,13 @@ export function ProductCard({ product }) {
             <div className="mx-4 h-px bg-slate-100" />
 
             {/* Card Body */}
-            <div className="flex flex-1 flex-col px-5 pt-4 pb-5">
+            <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
                 {/* Features */}
                 <ul className="space-y-1.5">
-                    {product.features.map((feature, i) => (
+                    {features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-2">
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
-                            <span className="text-sm font-medium text-slate-700 leading-snug">
+                            <span className="text-sm font-medium text-slate-700 leading-snug line-clamp-2">
                                 {feature}
                             </span>
                         </li>
@@ -129,7 +151,7 @@ export function ProductCard({ product }) {
 
                 {/* Tags */}
                 <div className="mt-3 flex flex-wrap gap-1">
-                    {product.tags.map((tag, i) => (
+                    {tags.map((tag, i) => (
                         <span
                             key={i}
                             className="inline-flex items-center gap-0.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600"
@@ -147,7 +169,7 @@ export function ProductCard({ product }) {
                 <div className="my-3 h-px w-full bg-slate-100" />
 
                 {/* Price & CTA */}
-                <div className="flex items-center justify-between gap-3">
+                <div className="mt-auto flex items-center justify-between gap-3">
                     {/* Price */}
                     <div>
                         {product.priceType === "fixed" ? (
@@ -156,7 +178,7 @@ export function ProductCard({ product }) {
                                     Price
                                 </p>
                                 <p className="mt-0.5 text-xl font-black tracking-tight text-red-600">
-                                    &#8377;{product.price}
+                                    {product.price}
                                 </p>
                             </>
                         ) : (
@@ -231,35 +253,42 @@ function OurProducts() {
         return null;
     }
 
+    // Find first featured product index for badge display
+    const firstFeaturedIndex = products.findIndex(p => p.featured);
+
     return (
         <section className="relative overflow-hidden bg-white py-16 sm:py-24 px-5 sm:px-8 border-b border-slate-100">
             {/* Subtle background accent */}
             <div className="pointer-events-none absolute left-0 top-0 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-50 blur-3xl" />
             <div className="pointer-events-none absolute right-0 bottom-0 h-80 w-80 translate-x-1/2 translate-y-1/2 rounded-full bg-slate-100 blur-3xl" />
 
-            <div className="relative mx-auto max-w-7xl">
-                {/* Section Header */}
+            <div className="relative mx-auto max-w-6xl">
+                {/* Section Header - matches Services and News style */}
                 <div className="text-center">
-                    <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl leading-tight">
-                        Explore Our{" "}
-                        <span className="text-red-600">Product Range</span>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                        Explore Our <span className="text-red-600">Product Range</span>
                     </h2>
+                    {/* Red line under title */}
+                    <div className="mt-4 mx-auto h-[3px] w-20 bg-red-600 rounded-full" />
                 </div>
 
-                {/* Product Grid */}
-                <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Product Grid - same gap and max-width as Services/News */}
+                <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     {loading ? (
                         Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="animate-pulse">
-                                <div className="rounded-xl bg-white border border-slate-200 overflow-hidden">
+                                <div className="group h-full flex flex-col rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
                                     <div className="h-40 bg-slate-100" />
-                                    <div className="p-5 space-y-3">
-                                        <div className="h-8 bg-slate-200 rounded w-3/4" />
-                                        <div className="h-4 bg-slate-200 rounded w-1/2" />
-                                        <div className="h-4 bg-slate-200 rounded w-1/2" />
-                                        <div className="h-4 bg-slate-200 rounded w-1/2" />
-                                        <div className="h-4 bg-slate-200 rounded w-1/2" />
-                                        <div className="mt-3 flex gap-1">
+                                    <div className="h-px bg-slate-100" />
+                                    <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
+                                        <div className="space-y-3">
+                                            <div className="h-8 bg-slate-200 rounded w-3/4" />
+                                            <div className="h-4 bg-slate-200 rounded w-1/2" />
+                                            <div className="h-4 bg-slate-200 rounded w-1/2" />
+                                            <div className="h-4 bg-slate-200 rounded w-1/2" />
+                                            <div className="h-4 bg-slate-200 rounded w-1/2" />
+                                        </div>
+                                        <div className="mt-auto pt-4 flex gap-1">
                                             <div className="h-6 w-20 bg-slate-200 rounded-full" />
                                             <div className="h-6 w-20 bg-slate-200 rounded-full" />
                                         </div>
@@ -269,21 +298,18 @@ function OurProducts() {
                         ))
                     ) : (
                         products.slice(0, 3).map((product, index) => (
-                            <ProductCard key={product.id} product={product} index={index} />
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                index={index}
+                                isFirstFeatured={index === firstFeaturedIndex}
+                            />
                         ))
                     )}
                 </div>
 
-                {/* See All Products Button */}
-                <div className="mt-12 flex justify-center">
-                    <Link
-                        to="/store"
-                        className="inline-flex items-center gap-3 rounded-full border-2 border-red-600 bg-white px-10 py-4 text-sm font-bold text-red-600 shadow-sm transition-all duration-300 hover:bg-red-600 hover:text-white hover:shadow-lg hover:shadow-red-600/20 hover:scale-105"
-                    >
-                        See All Products
-                        <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
+                {/* See All Products Button - using shared component */}
+                <ViewAllButton label="See All Products" to="/store" />
             </div>
         </section>
     );

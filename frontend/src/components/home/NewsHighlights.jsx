@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import ViewAllButton from "../common/ViewAllButton";
 import { getNews } from "../../services/newsService";
 import NewsCard from "../../components/news/NewsCard";
 
@@ -144,20 +143,19 @@ function NewsHighlights() {
                     </p>
                 </div>
 
-                {/* Cards Grid */}
-                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {/* Cards Grid - same gap and max-width as Services/Products */}
+                <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {loading ? (
                         Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="animate-pulse">
-                                <article className="group relative flex flex-col rounded-2xl overflow-hidden bg-white shadow-md border border-slate-100">
-                                    <div className="relative h-52 w-full bg-slate-200 shrink-0" />
-                                    <div className="flex flex-col flex-1 p-5">
-                                        <div className="h-6 bg-slate-200 rounded w-3/4 mb-2" />
-                                        <div className="h-4 bg-slate-200 rounded w-full" />
-                                        <div className="h-4 bg-slate-200 rounded w-2/3" />
-                                        <div className="mt-auto pt-4">
-                                            <div className="h-6 bg-slate-200 rounded w-1/4" />
-                                        </div>
+                                <article className="group h-full flex flex-col rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
+                                    <div className="relative aspect-[16/10] w-full bg-slate-100 shrink-0" />
+                                    <div className="h-px bg-slate-100" />
+                                    <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
+                                        <div className="h-8 bg-slate-200 rounded w-3/4" />
+                                        <div className="h-4 bg-slate-200 rounded w-full mt-2" />
+                                        <div className="h-4 bg-slate-200 rounded w-2/3 mt-2" />
+                                        <div className="mt-auto pt-4 h-10 bg-slate-200 rounded-lg w-1/3" />
                                     </div>
                                 </article>
                             </div>
@@ -169,18 +167,8 @@ function NewsHighlights() {
                     )}
                 </div>
 
-                {/* View All News button */}
-                {!loading && (
-                    <div className="mt-10 flex justify-center">
-                        <Link
-                            to="/news"
-                            className="inline-flex items-center gap-2 rounded-lg bg-[#1c2d5a] hover:bg-[#15234a] text-white font-bold text-sm px-8 py-3.5 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.03]"
-                        >
-                            View All News
-                            <ArrowRight className="h-4 w-4 transition-transform duration-300" />
-                        </Link>
-                    </div>
-                )}
+                {/* View All News button - using shared component */}
+                {!loading && <ViewAllButton label="View All News" to="/news" />}
             </div>
         </section>
     );

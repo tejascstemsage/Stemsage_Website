@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import ViewAllButton from "../common/ViewAllButton";
 
 import workshopImg from "../../assets/workshop-img.jpg";
 import eduKitImg from "../../assets/Edu-kit.webp";
@@ -120,8 +120,8 @@ function CardImage({ src, alt }) {
 export function ServiceCard({ item }) {
     return (
         <div className="group flex flex-col rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:border-red-200 hover:-translate-y-0.5">
-            {/* Top Image Area */}
-            <div className="w-full h-40 overflow-hidden bg-slate-100 shrink-0 relative">
+            {/* Top Image Area - aspect-[16/10] to match News cards */}
+            <div className="w-full aspect-[16/10] overflow-hidden bg-slate-100 shrink-0 relative">
                 <CardImage src={item.image} alt={item.title} />
             </div>
 
@@ -129,18 +129,18 @@ export function ServiceCard({ item }) {
             <div className="h-px bg-slate-100" />
 
             {/* Bottom Text Area */}
-            <div className="flex-1 flex flex-col justify-between px-5 pt-4 pb-5 text-left">
+            <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
                 <div>
-                    <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                    <h3 className="text-base font-extrabold text-slate-900 leading-tight line-clamp-2">
                         {item.title}
                     </h3>
-                    <p className="mt-2 text-sm font-medium text-slate-600 leading-snug">
+                    <p className="mt-2 text-sm font-medium text-slate-600 leading-snug line-clamp-4">
                         {item.description}
                     </p>
                 </div>
 
                 {/* Button */}
-                <div className="mt-5">
+                <div className="mt-auto pt-4">
                     <Link
                         to={item.link}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-2.5 px-4 transition-all duration-300 shadow hover:shadow-md hover:scale-[1.02]"
@@ -195,10 +195,10 @@ function WhatWeProvide() {
     return (
         <section className="relative overflow-hidden bg-white py-16 sm:py-24 px-5 sm:px-8 border-b border-slate-100">
             <div className="relative mx-auto max-w-6xl">
-                {/* Heading */}
+                {/* Heading - matches News and Products style */}
                 <div className="text-center">
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                        What we <span className="text-red-600">Provide</span> ?
+                        What we <span className="text-red-600">Provide</span>
                     </h2>
                     {/* Red line under title */}
                     <div className="mt-4 mx-auto h-[3px] w-20 bg-red-600 rounded-full" />
@@ -210,15 +210,15 @@ function WhatWeProvide() {
                         Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="animate-pulse">
                                 <div className="group flex flex-col rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
-                                    <div className="w-full h-40 bg-slate-100" />
+                                    <div className="w-full aspect-[16/10] bg-slate-100" />
                                     <div className="h-px bg-slate-100" />
-                                    <div className="flex-1 flex flex-col justify-between px-5 pt-4 pb-5">
+                                    <div className="flex-1 flex flex-col px-5 pt-4 pb-5">
                                         <div className="space-y-3">
                                             <div className="h-8 bg-slate-200 rounded w-3/4" />
                                             <div className="h-12 bg-slate-200 rounded w-full" />
                                             <div className="h-12 bg-slate-200 rounded w-full" />
                                         </div>
-                                        <div className="h-10 bg-slate-200 rounded-lg w-1/2" />
+                                        <div className="mt-auto pt-4 h-10 bg-slate-200 rounded-lg w-1/2" />
                                     </div>
                                 </div>
                             </div>
@@ -230,16 +230,8 @@ function WhatWeProvide() {
                     )}
                 </div>
 
-                {/* View All Services CTA */}
-                <div className="mt-12 flex justify-center">
-                    <Link
-                        to="/services"
-                        className="inline-flex items-center gap-3 rounded-full border-2 border-red-600 bg-white px-10 py-4 text-sm font-bold text-red-600 shadow-sm transition-all duration-300 hover:bg-red-600 hover:text-white hover:shadow-lg hover:shadow-red-600/20 hover:scale-105"
-                    >
-                        View All Services
-                        <ArrowRight className="h-4 w-4" />
-                    </Link>
-                </div>
+                {/* View All Services CTA - using shared component */}
+                <ViewAllButton label="View All Services" to="/services" />
             </div>
         </section>
     );
