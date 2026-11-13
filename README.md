@@ -20,6 +20,12 @@ Stemsage_Website/
 
 ---
 
+## Deployment Guide
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for a complete, step-by-step deployment guide for teammates who own the Vercel account and are new to this project.
+
+---
+
 ## Environment Variables
 
 Copy each `.env.example` to `.env` in the respective directory:
