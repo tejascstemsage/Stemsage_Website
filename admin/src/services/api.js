@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getApiBase } from './apiBase';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  baseURL: getApiBase()
 });
 
 api.interceptors.request.use((config) => {
@@ -17,7 +18,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('stemsage_admin_token');
-      window.location.href = '/login';
+      window.location.href = '/admin/login';
     }
     return Promise.reject(error);
   }

@@ -1,8 +1,23 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+/**
+ * Resolve the API base URL from VITE_API_URL.
+ * Accepts the value with or without a trailing "/api" and strips trailing
+ * slashes, so callers may set it to either "http://localhost:5000" or
+ * "http://localhost:5000/api". Defaults to localhost:5000.
+ */
+export function getApiBase() {
+  const raw = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  let base = String(raw).replace(/\/+$/, '');
+  if (!/\/api$/i.test(base)) {
+    base = `${base}/api`;
+  }
+  return base;
+}
+
+const API_URL = getApiBase();
 
 /**
  * Shared fetch wrapper with error handling
- * @param {string} endpoint - API endpoint (e.g., '/api/products')
+ * @param {string} endpoint - API endpoint (e.g., '/products')
  * @param {Object} options - fetch options
  * @returns {Promise<any>} Parsed JSON response
  */

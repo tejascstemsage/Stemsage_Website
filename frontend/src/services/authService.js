@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { getApiBase } from './apiClient';
+
+const API_URL = getApiBase();
 
 /**
  * Authenticates user via backend Google Auth endpoint.

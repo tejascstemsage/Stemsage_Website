@@ -11,7 +11,10 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:all": "npm install --prefix frontend && npm install --prefix admin",
+    "dev": "npm run dev --prefix frontend & npm run dev --prefix admin",
+    "build": "npm run build --prefix frontend && npm run build --prefix admin && node scripts/build-all.mjs"
   },
   "dependencies": {
     "playwright": "^1.65.0"
