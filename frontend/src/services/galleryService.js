@@ -5,7 +5,7 @@ import { apiFetch, normalizeImage } from './apiClient';
  * @returns {Promise<Array>} Array of gallery images
  */
 export const getGalleryImages = async () => {
-  const data = await apiFetch('/api/gallery');
+  const data = await apiFetch('/gallery');
   return (data.data || []).map((g) => ({
     ...g,
     image: normalizeImage(g.image),

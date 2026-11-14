@@ -5,7 +5,7 @@ import { apiFetch } from './apiClient';
  * @returns {Promise<Array>} Array of courses
  */
 export const getCourses = async () => {
-  const data = await apiFetch('/api/courses');
+  const data = await apiFetch('/courses');
   return data.data || [];
 };
 
@@ -14,6 +14,6 @@ export const getCourses = async () => {
  * @returns {Promise<Array>} Array of active courses
  */
 export const getActiveCourses = async () => {
-  const data = await apiFetch('/api/courses');
+  const data = await apiFetch('/courses');
   return (data.data || []).filter((c) => c.isActive);
 };

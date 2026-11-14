@@ -7,7 +7,7 @@ import { apiFetch, normalizeImage } from './apiClient';
  */
 export const getProducts = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
-  const endpoint = `/api/products${query ? `?${query}` : ''}`;
+  const endpoint = `/products${query ? `?${query}` : ''}`;
 
   const data = await apiFetch(endpoint);
   return (data.data || []).map((p) => ({
@@ -22,7 +22,7 @@ export const getProducts = async (params = {}) => {
  * @returns {Promise<Array>} Array of featured products
  */
 export const getFeaturedProducts = async () => {
-  const data = await apiFetch('/api/products?isFeatured=true&limit=3');
+  const data = await apiFetch('/products?isFeatured=true&limit=3');
   return (data.data || []).map((p) => ({
     ...p,
     image: normalizeImage(p.images?.[0]),
@@ -35,7 +35,7 @@ export const getFeaturedProducts = async () => {
  * @returns {Promise<Array>} Array of products for home
  */
 export const getHomeProducts = async () => {
-  const data = await apiFetch('/api/products?showOnHome=true&limit=3');
+  const data = await apiFetch('/products?showOnHome=true&limit=3');
   return (data.data || []).map((p) => ({
     ...p,
     image: normalizeImage(p.images?.[0]),
@@ -50,7 +50,7 @@ export const getHomeProducts = async () => {
  */
 export const getProductBySlug = async (slug) => {
   try {
-    const data = await apiFetch(`/api/products/slug/${encodeURIComponent(slug)}`);
+    const data = await apiFetch(`/products/slug/${encodeURIComponent(slug)}`);
     const product = data.data;
     if (!product) return null;
     return {

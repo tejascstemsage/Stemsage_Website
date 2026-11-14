@@ -6,7 +6,7 @@ import { apiFetch, normalizeImage } from './apiClient';
  * @returns {Promise<Array>} Array of news items
  */
 export const getNews = async (limit) => {
-  const url = limit ? `/api/news?limit=${limit}` : '/api/news';
+  const url = limit ? `/news?limit=${limit}` : '/news';
   const data = await apiFetch(url);
   return (data.data || []).map((n) => ({
     ...n,

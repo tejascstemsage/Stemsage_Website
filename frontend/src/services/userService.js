@@ -12,7 +12,7 @@ export const getProfile = async (token) => {
     throw new Error('Authentication token is required.');
   }
 
-  const response = await fetch(`${API_URL}/api/auth/me`, {
+  const response = await fetch(`${API_URL}/auth/me`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -43,7 +43,7 @@ export const updateProfile = async (token, profileData) => {
     throw new Error('Authentication token is required.');
   }
 
-  const response = await fetch(`${API_URL}/api/users/me`, {
+  const response = await fetch(`${API_URL}/users/me`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -78,7 +78,7 @@ export const uploadProfilePicture = async (token, file) => {
   const formData = new FormData();
   formData.append('profilePicture', file);
 
-  const response = await fetch(`${API_URL}/api/users/me/profile-picture`, {
+  const response = await fetch(`${API_URL}/users/me/profile-picture`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`

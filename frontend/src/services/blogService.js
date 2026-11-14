@@ -8,7 +8,7 @@ const API_URL = getApiBase();
  */
 export const getBlogs = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
-  const url = `${API_URL}/api/blogs${query ? `?${query}` : ''}`;
+  const url = `${API_URL}/blogs${query ? `?${query}` : ''}`;
 
   const response = await fetch(url, {
     method: 'GET',
@@ -35,7 +35,7 @@ export const getBlogs = async (params = {}) => {
  * @returns {Promise<Object>} API response data with blog object
  */
 export const getBlogBySlug = async (slug) => {
-  const response = await fetch(`${API_URL}/api/blogs/${encodeURIComponent(slug)}`, {
+  const response = await fetch(`${API_URL}/blogs/${encodeURIComponent(slug)}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -69,7 +69,7 @@ export const createBlog = async (token, blogData) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}/api/blogs`, {
+  const response = await fetch(`${API_URL}/blogs`, {
     method: 'POST',
     headers,
     body: JSON.stringify(blogData)

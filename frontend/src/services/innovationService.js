@@ -5,7 +5,7 @@ import { apiFetch, normalizeImage } from './apiClient';
  * @returns {Promise<Array>} Array of innovation doors
  */
 export const getInnovations = async () => {
-  const data = await apiFetch('/api/innovations');
+  const data = await apiFetch('/innovations');
   return (data.data || []).map((i) => ({
     ...i,
     gif: normalizeImage(i.gif),

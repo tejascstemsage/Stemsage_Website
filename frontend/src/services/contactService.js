@@ -6,7 +6,7 @@ import { apiFetch } from './apiClient';
  * @returns {Promise<Object>} API response
  */
 export const submitContact = async (formData) => {
-  return apiFetch('/api/contact', {
+  return apiFetch('/contact', {
     method: 'POST',
     body: JSON.stringify(formData),
   });

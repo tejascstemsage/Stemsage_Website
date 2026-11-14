@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true;
     const fetchMe = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/auth/me`, {
+        const response = await fetch(`${API_URL}/auth/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
 
     // Fetch final authoritative user profile from GET /api/auth/me
     try {
-      const response = await fetch(`${API_URL}/api/auth/me`, {
+      const response = await fetch(`${API_URL}/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${newToken}`,
