@@ -7,6 +7,7 @@ const testimonialSchema = new mongoose.Schema({
   quote: String,
   videoSrc: String,
   avatar: String,
+  avatarPublicId: String,
   isActive: { type: Boolean, default: true },
   order: { type: Number, default: 0 }
 }, { timestamps: true });

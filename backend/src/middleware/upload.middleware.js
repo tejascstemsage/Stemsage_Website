@@ -49,6 +49,41 @@ const uploadSingleProfilePicture = (req, res, next) => {
   });
 };
 
+/**
+ * Middleware for single image upload with field name 'file'.
+ * Wraps multer.MulterError into JSON 400 responses.
+ */
+const uploadSingleImage = (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File size exceeds maximum limit of 5 MB.'
+        });
+      }
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({
+          success: false,
+          message: 'Unexpected field. Expected a single file under key "file".'
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    } else if (err) {
+      // File filter error
+      return res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    }
+    next();
+  });
+};
+
 module.exports = {
-  uploadSingleProfilePicture
+  uploadSingleProfilePicture,
+  uploadSingleImage
 };

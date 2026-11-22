@@ -1,20 +1,16 @@
 import { useState } from 'react';
+import { useController, Controller } from 'react-hook-form';
 import { Upload, X } from 'lucide-react';
+import api from '../../services/api';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-export default function ImageUploader({
-  name,
-  control,
-  error,
-  multiple = false,
-  maxFiles = 5,
-  accept = ALLOWED_TYPES.join(','),
-}) {
+function ImageUploaderInner({ name, control, error, multiple = false, maxFiles = 5, accept = ALLOWED_TYPES.join(',') }) {
   const [previews, setPreviews] = useState([]);
+  const { field, fieldState } = useController({ name, control });
 
-  const handleFiles = (files) => {
+  const handleFiles = async (files) => {
     const validFiles = [];
     const newPreviews = [];
 
@@ -32,16 +28,61 @@ export default function ImageUploader({
     }
 
     if (multiple) {
-      const current = control.getValues(name) || [];
+      const current = field.value || [];
       if (current.length + validFiles.length > maxFiles) {
         alert(`Maximum ${maxFiles} files allowed`);
         validFiles.forEach((_, i) => URL.revokeObjectURL(newPreviews[i]));
         return;
       }
-      control.setValue(name, [...current, ...validFiles], { shouldValidate: true });
+      // Upload each file to Cloudinary and get URLs
+      const uploadedFiles = await Promise.all(validFiles.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const res = await api.post('/admin/upload-image', formData);
+          // Response shape: { success: true, data: { url: secure_url, publicId: public_id } }
+          const data = res.data;
+          if (res.status === 200 && data?.data?.url) return data.data;
+        } catch (e) {
+          // Handle error response from backend
+          if (e.response && e.response?.data?.message) {
+            console.error('Upload error:', e.response.data.message);
+          } else {
+            console.error('Upload error:', e);
+          }
+        }
+        // Fallback: return object URL if upload fails
+        return { url: URL.createObjectURL(file), publicId: null };
+      }));
+      // uploadedFiles is already an array of {url, publicId} objects
+      field.onChange(uploadedFiles);
       setPreviews((prev) => [...prev, ...newPreviews]);
     } else {
-      control.setValue(name, validFiles[0], { shouldValidate: true });
+      // Upload single file to Cloudinary
+      const file = validFiles[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await api.post('/admin/upload-image', formData);
+        // Response shape: { success: true, data: { url: secure_url, publicId: public_id } }
+        const data = res.data;
+        if (res.status === 200 && data?.data?.url) {
+          field.onChange(data.data);
+          setPreviews([newPreviews[0]]);
+          return;
+        }
+      } catch (e) {
+        // Handle error response from backend
+        if (e.response && e.response?.data?.message) {
+          console.error('Upload error:', e.response.data.message);
+        } else {
+          console.error('Upload error:', e);
+        }
+      }
+      // Fallback: return object URL if upload fails
+      field.onChange({ url: URL.createObjectURL(file), publicId: null });
       setPreviews([newPreviews[0]]);
     }
   };
@@ -54,15 +95,14 @@ export default function ImageUploader({
   };
 
   const removeFile = (index) => {
-    const current = control.getValues(name) || [];
-    const newFiles = multiple
-      ? current.filter((_, i) => i !== index)
-      : null;
-
-    control.setValue(name, newFiles, { shouldValidate: true });
-
     URL.revokeObjectURL(previews[index]);
     setPreviews((prev) => prev.filter((_, i) => i !== index));
+    // Always set the field value to null when removing an image
+    if (multiple) {
+      field.onChange([]);
+    } else {
+      field.onChange(null);
+    }
   };
 
   return (
@@ -106,4 +146,8 @@ export default function ImageUploader({
       {error && <p className="text-sm text-red-500">{error.message}</p>}
     </div>
   );
+}
+
+export default function ImageUploader(props) {
+  return <Controller name={props.name} control={props.control} render={({ field, fieldState }) => <ImageUploaderInner {...props} field={field} fieldState={fieldState} />} />;
 }

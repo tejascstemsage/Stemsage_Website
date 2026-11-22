@@ -19,6 +19,7 @@ const GalleryImage = require('./src/models/GalleryImage');
 const AssociationLogo = require('./src/models/AssociationLogo');
 const InnovationDoor = require('./src/models/InnovationDoor');
 const { createCrudRoutes } = require('./src/utils/routes/crudRoutes');
+const uploadImageRouter = require('./src/routes/upload-image.routes');
 
 const app = express();
 
@@ -102,6 +103,9 @@ app.use('/api/admin/blogs', blogAdminRoutes);
 
 // Contact message admin routes (GET all, PATCH status, DELETE)
 app.use('/api/admin/contact', contactAdminRoutes);
+
+// Image upload route for admin forms
+app.use('/api/admin/upload-image', uploadImageRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
