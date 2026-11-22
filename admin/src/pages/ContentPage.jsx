@@ -95,30 +95,15 @@ export default function ContentPage() {
     try {
       setSubmitting(true);
       const payload = config.transform(formData);
-      const formDataToSend = new FormData();
-
-      Object.entries(payload).forEach(([key, value]) => {
-        if (key === 'images' && Array.isArray(value)) {
-          value.forEach((file) => formDataToSend.append('images', file));
-        } else if (value instanceof File) {
-          formDataToSend.append(key, value);
-        } else if (Array.isArray(value)) {
-          formDataToSend.append(key, JSON.stringify(value));
-        } else if (typeof value === 'object' && value !== null) {
-          formDataToSend.append(key, JSON.stringify(value));
-        } else {
-          formDataToSend.append(key, value);
-        }
-      });
 
       if (editingItem) {
-        await api.put(`/admin/${config.endpoint}/${editingItem._id || editingItem.id}`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        await api.put(`/admin/${config.endpoint}/${editingItem._id || editingItem.id}`, payload, {
+          headers: { 'Content-Type': 'application/json' },
         });
         toast.success(`${config.singular} updated`);
       } else {
-        await api.post(`/admin/${config.endpoint}`, formDataToSend, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        await api.post(`/admin/${config.endpoint}`, payload, {
+          headers: { 'Content-Type': 'application/json' },
         });
         toast.success(`${config.singular} created`);
       }

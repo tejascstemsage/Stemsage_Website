@@ -88,19 +88,22 @@ export const contentTypes = {
     schema: z.object({
       title: z.string().min(1, 'Title is required'),
       description: z.string().min(1, 'Description is required'),
-      image: z.instanceof(File, { message: 'Image is required' }),
+      image: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       buttonText: z.string().min(1, 'Button text is required'),
       link: z.string().min(1, 'Link is required'),
       isActive: z.boolean().optional(),
     }),
-    transform: (data) => ({
-      title: data.title,
-      description: data.description,
-      image: data.image,
-      buttonText: data.buttonText,
-      link: data.link,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const img = data.image;
+      // Normalise to {url, publicId} object
+      if (!img) return { title: data.title, description: data.description, image: null, buttonText: data.buttonText, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'string') return { title: data.title, description: data.description, image: { url: img }, buttonText: data.buttonText, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'object' && img?.url) return { title: data.title, description: data.description, image: { url: img.url, publicId: img.publicId }, buttonText: data.buttonText, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { title: data.title, description: data.description, image: { url: img?.url || '' }, buttonText: data.buttonText, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true },
   },
 
@@ -196,21 +199,22 @@ export const contentTypes = {
       type: z.enum(['text', 'video']),
       quote: z.string().optional(),
       videoSrc: z.string().url().optional().or(z.literal('')),
-      avatar: z.instanceof(File, { message: 'Avatar is required' }),
+      avatar: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       isActive: z.boolean().optional(),
     }).refine((data) => data.type === 'video' || (data.quote && data.quote.trim()), {
       message: 'Quote is required for text testimonials',
       path: ['quote'],
     }),
-    transform: (data) => ({
-      name: data.name,
-      role: data.role,
-      type: data.type,
-      quote: data.type === 'text' ? data.quote : '',
-      videoSrc: data.type === 'video' ? data.videoSrc : '',
-      avatar: data.avatar,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const img = data.avatar;
+      if (!img) return { name: data.name, role: data.role, type: data.type, quote: data.type === 'text' ? data.quote : '', videoSrc: data.type === 'video' ? data.videoSrc : '', avatar: null, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'string') return { name: data.name, role: data.role, type: data.type, quote: data.type === 'text' ? data.quote : '', videoSrc: data.type === 'video' ? data.videoSrc : '', avatar: { url: img }, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'object' && img?.url) return { name: data.name, role: data.role, type: data.type, quote: data.type === 'text' ? data.quote : '', videoSrc: data.type === 'video' ? data.videoSrc : '', avatar: { url: img.url, publicId: img.publicId }, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { name: data.name, role: data.role, type: data.type, quote: data.type === 'text' ? data.quote : '', videoSrc: data.type === 'video' ? data.videoSrc : '', avatar: { url: img?.url || '' }, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true, type: 'text' },
   },
 
@@ -237,18 +241,20 @@ export const contentTypes = {
       title: z.string().min(1, 'Title is required'),
       tag: z.string().min(1, 'Tag is required'),
       date: z.string().min(1, 'Date is required'),
-      image: z.instanceof(File, { message: 'Image is required' }),
+      image: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       link: z.string().min(1, 'Link is required'),
       isActive: z.boolean().optional(),
     }),
-    transform: (data) => ({
-      title: data.title,
-      tag: data.tag,
-      date: data.date,
-      image: data.image,
-      link: data.link,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const img = data.image;
+      if (!img) return { title: data.title, tag: data.tag, date: data.date, image: null, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'string') return { title: data.title, tag: data.tag, date: data.date, image: { url: img }, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'object' && img?.url) return { title: data.title, tag: data.tag, date: data.date, image: { url: img.url, publicId: img.publicId }, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { title: data.title, tag: data.tag, date: data.date, image: { url: img?.url || '' }, link: data.link, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true },
   },
 
@@ -268,14 +274,19 @@ export const contentTypes = {
     ],
     schema: z.object({
       title: z.string().min(1, 'Title is required'),
-      image: z.instanceof(File, { message: 'Image is required' }),
+      image: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       isActive: z.boolean().optional(),
     }),
-    transform: (data) => ({
-      title: data.title,
-      image: data.image,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const img = data.image;
+      if (!img) return { title: data.title, image: null, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'string') return { title: data.title, image: { url: img }, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof img === 'object' && img?.url) return { title: data.title, image: { url: img.url, publicId: img.publicId }, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { title: data.title, image: { url: img?.url || '' }, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true },
   },
 
@@ -295,14 +306,19 @@ export const contentTypes = {
     ],
     schema: z.object({
       name: z.string().min(1, 'Name is required'),
-      src: z.instanceof(File, { message: 'Logo image is required' }),
+      src: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       isActive: z.boolean().optional(),
     }),
-    transform: (data) => ({
-      name: data.name,
-      src: data.src,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const src = data.src;
+      if (!src) return { name: data.name, src: null, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof src === 'string') return { name: data.name, src: { url: src }, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof src === 'object' && src?.url) return { name: data.name, src: { url: src.url, publicId: src.publicId }, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { name: data.name, src: { url: src?.url || '' }, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true },
   },
 
@@ -322,14 +338,19 @@ export const contentTypes = {
     ],
     schema: z.object({
       name: z.string().min(1, 'Name is required'),
-      gif: z.instanceof(File, { message: 'GIF is required' }),
+      gif: z.preprocess(
+        (v) => (typeof v === 'string' && v ? { url: v } : v),
+        z.object({ url: z.string().min(1), publicId: z.string().optional() })
+      ),
       isActive: z.boolean().optional(),
     }),
-    transform: (data) => ({
-      name: data.name,
-      gif: data.gif,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    }),
+    transform: (data) => {
+      const gif = data.gif;
+      if (!gif) return { name: data.name, gif: null, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof gif === 'string') return { name: data.name, gif: { url: gif }, isActive: data.isActive !== undefined ? data.isActive : true };
+      if (typeof gif === 'object' && gif?.url) return { name: data.name, gif: { url: gif.url, publicId: gif.publicId }, isActive: data.isActive !== undefined ? data.isActive : true };
+      return { name: data.name, gif: { url: gif?.url || '' }, isActive: data.isActive !== undefined ? data.isActive : true };
+    },
     defaultValues: { isActive: true },
   },
 

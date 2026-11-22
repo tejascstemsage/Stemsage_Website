@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const serviceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  image: String,
+  image: { type: String, required: true },
+  imagePublicId: String,
   icon: String,
   buttonText: String,
   link: String,

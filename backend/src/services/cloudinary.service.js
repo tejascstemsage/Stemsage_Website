@@ -66,6 +66,28 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 };
 
+/**
+ * Deletes an asset by its Cloudinary public_id (exact, no URL parsing).
+ * @param {string} publicId
+ * @returns {Promise<boolean>}
+ */
+const deleteByPublicId = async (publicId) => {
+  if (!publicId || typeof publicId !== 'string') return false;
+  try {
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    return result.result === 'ok';
+  } catch (error) {
+    console.error('Error deleting Cloudinary asset:', error.message);
+    return false;
+  }
+};
+
+module.exports = {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  deleteByPublicId
+};
+
 module.exports = {
   uploadToCloudinary,
   deleteFromCloudinary
